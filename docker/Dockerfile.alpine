@@ -1,0 +1,27 @@
+# Stage 1: Build dependencies
+FROM alpine:3.14 as build
+
+RUN apk --no-cache add \
+    git cmake g++ make python3 py3-pip \
+    boost-dev eigen-dev zlib-dev ncurses-dev \
+    gdbm-dev nss-dev openssl-dev readline-dev ffi-dev \
+    wget ca-certificates
+
+RUN git clone https://github.com/SVRTK/MIRTK.git /home/MIRTK
+RUN git clone https://github.com/SVRTK/SVRTK.git /home/MIRTK/Packages/SVRTK
+
+WORKDIR /home/MIRTK
+RUN mkdir build
+WORKDIR /home/MIRTK/build
+
+RUN cmake -D WITH_TBB="ON" -D MODULE_SVRTK="ON" ..
+RUN make -j
+
+# Stage 2: Final image with the built binary
+FROM alpine:3.14
+
+# Copy only the necessary files from the build stage
+COPY --from=build /home/MIRTK/build/bin/mirtk /usr/local/bin/
+
+# Update path
+ENV PATH="/usr/local/bin:${PATH}"
