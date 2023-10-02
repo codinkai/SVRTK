@@ -23,6 +23,9 @@ RUN make -j
 RUN zip -r /home/MIRTK/build.zip /home/MIRTK/build
 RUN cp /home/MIRTK/build/bin/mirtk /usr/local/bin/
 
+RUN apk del git cmake g++ make py3-pip \
+    wget ca-certificates
+
 #
 # Stage 2: Build lightweight image
 #
