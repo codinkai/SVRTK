@@ -1,5 +1,5 @@
 #
-# Stage 1: Build dependencies
+# Stage 1: Build SVRTK
 #
 
 FROM alpine:3.14 as build
@@ -27,20 +27,18 @@ RUN apk del git cmake g++ make py3-pip \
     wget ca-certificates
 
 #
-# Stage 2: Build lightweight image
+# Stage 2: Create lightweight image
 #
 
 FROM alpine:3.14
 
 RUN apk --no-cache add \
-    python3 \
-	&& ln -sf python3 /usr/bin/python
+    python3 libgomp libtbb boost \
+    && ln -sf python3 /usr/bin/python
 RUN mkdir -p /home/MIRTK/build	
 	
 COPY --from=build /home/MIRTK/build /home/MIRTK/build
 COPY --from=build /usr/local/bin/mirtk /usr/local/bin/mirtk
-COPY --from=build /lib /lib
-COPY --from=build /usr/lib /usr/lib
 
 RUN adduser -D MIRTK
 USER MIRTK
